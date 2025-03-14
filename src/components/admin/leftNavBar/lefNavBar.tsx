@@ -31,9 +31,9 @@ export default function LeftNavBar({
       {navItems.map((item) => (
         <button
           key={item.label}
+          type='button'
           onClick={() => setSelectedLabel(item.label)}
           className={`py-2 px-4 rounded-lg mt-1 transition-all duration-400 ease-in-out  ${item.label === selectedLabel ? 'shadow-adminNavBarButton bg-adminButton  ' : 'hover:bg-adminButton/60 hover:shadow-adminNavBarButton'} transition-colors`}
-          aria-pressed={item.label === selectedLabel}
         >
           {item.label}
         </button>
@@ -54,8 +54,8 @@ export default function LeftNavBar({
         onClose={() => toggleDrawer(false)}
         sx={{
           '& .MuiDrawer-paper': {
-            top: '4rem', // Start at the bottom of the header
-            height: 'calc(100% - 4rem)', // Height reduced by the height of the header
+            top: '3.8rem', // Start at the bottom of the header
+            height: 'calc(100% - 3.8rem)', // Height reduced by the height of the header
           },
         }}
       >
