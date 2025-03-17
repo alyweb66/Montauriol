@@ -33,7 +33,7 @@ export default function LeftNavBar({
           key={item.label}
           type='button'
           onClick={() => setSelectedLabel(item.label)}
-          className={`py-2 px-4 rounded-lg mt-1 transition-all duration-400 ease-in-out  ${item.label === selectedLabel ? 'shadow-adminNavBarButton bg-adminButton  ' : 'hover:bg-adminButton/60 hover:shadow-adminNavBarButton'} transition-colors`}
+          className={`py-2 px-4 rounded-lg mt-1 transition-all duration-400 ease-in-out  ${item.label === selectedLabel ? 'shadow-adminNavBarButton bg-[image:var(--color-adminButton)] ' : 'hover:bg-[image:var(--color-hoverAdminButton)] hover:shadow-adminNavBarButton'} transition-colors`}
         >
           {item.label}
         </button>

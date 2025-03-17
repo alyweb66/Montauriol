@@ -14,7 +14,7 @@ export default function Header({ toggleDrawer }: HeaderProps) {
           aria-label="Ouvrir le menu"
           onClick={() => toggleDrawer(true)}
           style={{
-            backgroundColor: 'var(--color-adminButton)',
+            backgroundImage: 'var(--color-adminButton)',
             color: 'var(--color-textPrimary)',
           }}
         >
@@ -25,7 +25,7 @@ export default function Header({ toggleDrawer }: HeaderProps) {
         className="shadow-adminNavBarButton"
         aria-label="Déconnexion"
         style={{
-          backgroundColor: 'var(--color-adminButton)',
+          backgroundImage: 'var(--color-adminButton)',
           color: 'var(--color-textPrimary)',
         }}
       >

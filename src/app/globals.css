@@ -13,8 +13,10 @@
 
   /*   --color-adminBg: radial-gradient(ellipse at top left, #e2e8f0, #64748b); */
   --color-adminBg: radial-gradient(ellipse at top left, #90a1b9, #1d293d);
-  --color-adminButton: theme(colors.amber.600);
-  --color-hoverAdminButton: theme(colors.slate.500);
+  --color-adminButton: radial-gradient(ellipse at top left, #e17100, #F29B20);
+ /*  --color-adminButtonHover: radial-gradient(ellipse at top left, #e17100, #F29B20); */
+  /* --color-adminButton: theme(colors.amber.600); */
+  --color-hoverAdminButton: radial-gradient(ellipse at top left, #F29B20, #e17100);
   --color-adminPrimary: theme(colors.gray.200);
   --color-adminSecondary: theme(colors.gray.300);
   --color-textPrimary: #ffffff;

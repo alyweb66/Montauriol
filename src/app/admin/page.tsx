@@ -98,9 +98,9 @@ export default function Admin() {
             marginTop: '16px',
             width: '50%',
             color: 'var(--color-textPrimary)',
-            backgroundColor: 'var(--color-adminButton)',
+            backgroundImage: 'var(--color-adminButton)',
             '&:hover': {
-              backgroundColor: 'var(--color-hoverAdminButton)',
+              backgroundImage: 'var(--color-hoverAdminButton)',
             },
           }}
         >
