@@ -9,6 +9,19 @@ const nextConfig: NextConfig = {
     }
     return config
   },
+  experimental: {
+    turbo: {
+      resolveExtensions: [
+        '.mdx',
+        '.tsx',
+        '.ts',
+        '.jsx',
+        '.js',
+        '.mjs',
+        '.json',
+      ],
+    },
+  },
   /* config options here */
 };
 
