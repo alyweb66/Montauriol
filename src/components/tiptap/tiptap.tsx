@@ -3,8 +3,8 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Heading from '@tiptap/extension-heading';
-import HorizontalRule from '@tiptap/extension-horizontal-rule'
-import Image from '@tiptap/extension-image'
+import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import Image from '@tiptap/extension-image';
 import {
   FormatBoldIcon,
   FormatItalicIcon,
@@ -18,13 +18,27 @@ import {
   TitleIcon,
   HorizontalRuleIcon,
   ImageIcon,
+  useState,
 } from '../ui';
 
 const TiptapEditor = () => {
+  const [previousImages, setPreviousImages] = useState<string[]>([]);
+
   const editor = useEditor({
     extensions: [StarterKit, Heading, HorizontalRule, Image],
-
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      // Récupérer toutes les images actuelles
+      const currentImages = editor.getHTML().match(/<img src="([^"]+)"/g)?.map(img => img.replace('<img src="', '').replace('"', '')) || [];
+
+      // Comparer avec l'état précédent pour détecter les suppressions
+      const deletedImages = previousImages.filter(url => !currentImages.includes(url));
+
+     
+
+      // Mettre à jour la liste des images enregistrées
+      setPreviousImages(currentImages);
+    },
   });
 
   if (!editor) return <p>Chargement…</p>;
@@ -47,9 +61,38 @@ type MenuBarProps = {
 const MenuBar = ({ editor }: MenuBarProps) => {
   if (!editor) return null;
 
+  // Upload media
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    if (!e.target.files) return;
+
+    // Create a new FormData object
+    const formData = new FormData();
+    for (let i = 0; i < e.target.files.length; i++) {
+      formData.append('media', e.target.files[i]);
+    }
+
+
+    try {
+      // Send the files to the server
+      const res = await fetch('/api/uploadFiles', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      // Set the image in the editor
+      if (data.files[0].url) {
+        editor.chain().focus().setImage({ src: data.files[0].url }).run()
+      }
+   
+    } catch (error) {
+      console.error('Erreur lors de l\'upload :', error);
+    }
+  };
+
   return (
     <div className=" w-full border-b-1 border-gray-200 pb-1">
- 
       <button
         title="Titre 1"
         type="button"
@@ -62,7 +105,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <TitleIcon />
       </button>
-  
 
       <button
         title="Gras"
@@ -113,11 +155,12 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         <FormatQuoteIcon />
       </button>
       <button
-      title='Horizontal rule'
-      type='button' 
-      onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-           <HorizontalRuleIcon />
-          </button>
+        title="Horizontal rule"
+        type="button"
+        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      >
+        <HorizontalRuleIcon />
+      </button>
       <button
         title="Liste à puce"
         type="button"
@@ -146,15 +189,31 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Sous liste"
         type="button"
+        className='p-1 rounded-full m-1'
         onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
         disabled={!editor.can().sinkListItem('listItem')}
       >
         <SegmentIcon />
       </button>
-      <button 
-      title="Image"
-      type="button"
-      onClick={addImage}>
+      <input
+        id="fileInput"
+        type="file"
+        title="Ajoouter une image"
+        onChange={handleFileChange}
+        onClick={(event) => {
+          event.currentTarget.value = '';
+        }}
+        accept="image/png, image/jpeg, image/jpg"
+        className="hidden" // Cache l'input
+        aria-label="Ajouter une image"
+      />
+      <button
+        title="Ajouter une image"
+        type="button"
+        className='p-1 rounded-full m-1'
+        onClick={() => document.getElementById('fileInput')?.click()}
+        aria-label="Ajouter une image"
+      >
         <ImageIcon />
       </button>
       <button
