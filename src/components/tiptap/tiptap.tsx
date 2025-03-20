@@ -27,19 +27,49 @@ const TiptapEditor = () => {
   const editor = useEditor({
     extensions: [StarterKit, Heading, HorizontalRule, Image],
     immediatelyRender: false,
-    onUpdate: ({ editor }) => {
+    onUpdate: async ({ editor }) => {
       // Récupérer toutes les images actuelles
-      const currentImages = editor.getHTML().match(/<img src="([^"]+)"/g)?.map(img => img.replace('<img src="', '').replace('"', '')) || [];
+      const currentImages =
+        editor
+          .getHTML()
+          .match(/<img src="([^"]+)"/g)
+          ?.map((img) => img.replace('<img src="', '').replace('"', '')) || [];
 
-      // Comparer avec l'état précédent pour détecter les suppressions
-      const deletedImages = previousImages.filter(url => !currentImages.includes(url));
+      // Compare with the previous images
+      const deletedImages = previousImages.filter(
+        (url) => !currentImages.includes(url)
+      );
 
-     
+      if (deletedImages.length > 0) {
+        try {
+          // Delete the images
+          const response = await fetch('/api/uploadFiles', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ files: deletedImages }),
+          });
 
-      // Mettre à jour la liste des images enregistrées
+          // Get the response
+          const data = await response.json();
+
+          if (data.error) {
+            console.error(
+              'Error deleting images :',
+              data.error
+            );
+          }
+        } catch (error) {
+          console.error('Error deleting image :', error);
+        }
+      }
+
+      // Update the previous images
       setPreviousImages(currentImages);
     },
   });
+
 
   if (!editor) return <p>Chargement…</p>;
 
@@ -63,7 +93,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
 
   // Upload media
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-
     if (!e.target.files) return;
 
     // Create a new FormData object
@@ -72,22 +101,22 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       formData.append('media', e.target.files[i]);
     }
 
-
     try {
       // Send the files to the server
-      const res = await fetch('/api/uploadFiles', {
+      const response = await fetch('/api/uploadFiles', {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
-      
+
+      // Get the response
+      const data = await response.json();
+
       // Set the image in the editor
       if (data.files[0].url) {
-        editor.chain().focus().setImage({ src: data.files[0].url }).run()
+        editor.chain().focus().setImage({ src: data.files[0].url }).run();
       }
-   
     } catch (error) {
-      console.error('Erreur lors de l\'upload :', error);
+      console.error("Upload error:", error);
     }
   };
 
@@ -189,7 +218,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Sous liste"
         type="button"
-        className='p-1 rounded-full m-1'
+        className="p-1 rounded-full m-1"
         onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
         disabled={!editor.can().sinkListItem('listItem')}
       >
@@ -210,7 +239,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Ajouter une image"
         type="button"
-        className='p-1 rounded-full m-1'
+        className="p-1 rounded-full m-1"
         onClick={() => document.getElementById('fileInput')?.click()}
         aria-label="Ajouter une image"
       >
