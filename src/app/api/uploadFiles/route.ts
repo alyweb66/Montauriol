@@ -16,10 +16,19 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const media = formData.get('media') as File | null; // Récupère un fichier envoyé
 
-    // Check if a file was uploaded
+    // Check format file for buffer
     if (!media || !(media instanceof File)) {
       return NextResponse.json({ error: 'No files uploaded' }, { status: 400 });
     }
+
+    if (
+      media.type !== 'image/jpeg' &&
+      media.type !== 'image/png' &&
+      media.type !== 'image/jpg'
+    ) {
+      return NextResponse.json({ error: 'Bad input file' }, { status: 400 });
+    }
+
     // convert the file to a buffer
     const arrayBuffer = await media.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -36,7 +45,6 @@ export async function POST(req: NextRequest) {
     const uploadedFiles = await handleUploadedFiles([newMedia], false);
     return NextResponse.json({ success: true, files: uploadedFiles });
   } catch (error) {
-    console.error('Upload error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -46,7 +54,6 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/uploadFiles
 export async function DELETE(req: NextRequest) {
-
   try {
     const { files } = await req.json();
 
@@ -59,10 +66,9 @@ export async function DELETE(req: NextRequest) {
         { status: 400 }
       );
     }
-   
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

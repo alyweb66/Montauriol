@@ -2,8 +2,6 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Heading from '@tiptap/extension-heading';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Image from '@tiptap/extension-image';
 import {
   FormatBoldIcon,
@@ -18,17 +16,19 @@ import {
   TitleIcon,
   HorizontalRuleIcon,
   ImageIcon,
+  toast,
   useState,
+  useEffect,
 } from '../ui';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
   const editor = useEditor({
-    extensions: [StarterKit, Heading, HorizontalRule, Image],
+    extensions: [StarterKit, Image],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
-      // Récupérer toutes les images actuelles
+      // Get the current images
       const currentImages =
         editor
           .getHTML()
@@ -51,17 +51,20 @@ const TiptapEditor = () => {
             body: JSON.stringify({ files: deletedImages }),
           });
 
-          // Get the response
-          const data = await response.json();
-
-          if (data.error) {
-            console.error(
-              'Error deleting images :',
-              data.error
-            );
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error deleting image');
           }
+
         } catch (error) {
-          console.error('Error deleting image :', error);
+          let errorMessage = "Erreur lors de la suppression de l'image";
+          // Check if the error is an instance of Error
+          if (error instanceof Error) {
+            if (error.message.includes('Internal Server Error') || error.message.includes('Error deleting files')) {
+              errorMessage = "Erreur lors de la suppression de l'image";
+            }
+          }
+          toast.error(errorMessage);
         }
       }
 
@@ -69,7 +72,6 @@ const TiptapEditor = () => {
       setPreviousImages(currentImages);
     },
   });
-
 
   if (!editor) return <p>Chargement…</p>;
 
@@ -92,13 +94,14 @@ const MenuBar = ({ editor }: MenuBarProps) => {
   if (!editor) return null;
 
   // Upload media
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!event.target.files) return;
     // Create a new FormData object
     const formData = new FormData();
-    for (let i = 0; i < e.target.files.length; i++) {
-      formData.append('media', e.target.files[i]);
+    for (let i = 0; i < event.target.files.length; i++) {
+      formData.append('media', event.target.files[i]);
     }
 
     try {
@@ -108,7 +111,11 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         body: formData,
       });
 
-      // Get the response
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur HTTP');
+      }
+
       const data = await response.json();
 
       // Set the image in the editor
@@ -116,7 +123,19 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         editor.chain().focus().setImage({ src: data.files[0].url }).run();
       }
     } catch (error) {
-      console.error("Upload error:", error);
+      let errorMessage = "Erreur lors de l'envoi de l'image";
+      // Check if the error is an instance of Error
+      if (error instanceof Error) {
+        errorMessage = error.message;
+
+        if (error.message.includes('Bad input file')) {
+          errorMessage =
+            'Format de fichier non supporté (seuls JPG/JPEG/PNG sont autorisés 15Mo max)';
+        } else {
+          errorMessage = 'Erreur avec le fichier';
+        }
+      }
+      toast.error(errorMessage);
     }
   };
 

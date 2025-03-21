@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
+import { toast } from '../components/ui';
 
 export const config = {
   api: {
@@ -40,7 +41,7 @@ export async function handleUploadedFiles(
     media.map(async (file) => {
       const { type, name, buffer } = file;
       if (!name) {
-        throw new Error('Nom de fichier manquant');
+        throw new Error('Name not found');
       }
       // Extract the file name and extension
       const fileNameWithoutExtension = path.parse(name).name;
@@ -49,7 +50,9 @@ export async function handleUploadedFiles(
       // Check if the file extension is valid
       const validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
       if (!validExtensions.includes(extension)) {
-        throw new Error('Format de fichier non valide');
+        console.log('Extension invalide');
+        
+        throw new Error('Bad input file');
       }
 
       // Normalize the file name
@@ -64,7 +67,7 @@ export async function handleUploadedFiles(
       } else if (type === 'application/pdf') {
         uniqueFileName = `${normalizedFileName}_${uniqueId}${extension}`;
       } else {
-        throw new Error('Type de fichier non supporté');
+        throw new Error('Bad input file');
       }
 
       // Destination folder
@@ -84,7 +87,7 @@ export async function handleUploadedFiles(
       // Get the buffer of the file
       const fileBuffer = buffer;
 
-
+      
       if (
         type.startsWith('image/') &&
         fileBuffer.length < Number(process.env.MAX_IMAGE_SIZE)
@@ -112,7 +115,7 @@ export async function handleUploadedFiles(
         // For pdf files, we just save the buffer
         await fs.promises.writeFile(filePath, fileBuffer);
       } else {
-        throw new Error('Fichier trop volumineux ou non supporté');
+        throw new Error('Bad input file');
       }
 
       // Build the URL for the image

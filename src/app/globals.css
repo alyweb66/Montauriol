@@ -62,4 +62,5 @@ blockquote {
   margin-left: 0;
   padding-left: 1em;
   border-left: 2px solid #ddd;
+  background-color: rgba(128, 94, 56, 0.541);
 }

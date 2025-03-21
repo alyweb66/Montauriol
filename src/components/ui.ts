@@ -7,6 +7,9 @@ export { default as Drawer } from '@mui/material/Drawer';
 export { default as IconButton } from '@mui/material/IconButton';
 export { default as MenuIcon } from '@mui/icons-material/Menu';
 
+// React-toastify
+export { toast } from 'react-toastify';
+
 // MUI components
 export { default as TextField } from '@mui/material/TextField';
 export { default as Button } from '@mui/material/Button';
