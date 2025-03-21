@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import { CustomImage } from '../../lib/ResizableImage';
 import {
   FormatBoldIcon,
   FormatItalicIcon,
@@ -18,14 +19,14 @@ import {
   ImageIcon,
   toast,
   useState,
-  useEffect,
 } from '../ui';
+import './titap.css';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
   const editor = useEditor({
-    extensions: [StarterKit, Image],
+    extensions: [StarterKit, CustomImage],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
       // Get the current images
@@ -55,12 +56,14 @@ const TiptapEditor = () => {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Error deleting image');
           }
-
         } catch (error) {
           let errorMessage = "Erreur lors de la suppression de l'image";
           // Check if the error is an instance of Error
           if (error instanceof Error) {
-            if (error.message.includes('Internal Server Error') || error.message.includes('Error deleting files')) {
+            if (
+              error.message.includes('Internal Server Error') ||
+              error.message.includes('Error deleting files')
+            ) {
               errorMessage = "Erreur lors de la suppression de l'image";
             }
           }
@@ -80,7 +83,7 @@ const TiptapEditor = () => {
       <MenuBar editor={editor} />
       <EditorContent
         editor={editor}
-        className=" min-h-70 p-4 mt-2 rounded-lg "
+        className="editor-content min-h-70 w-full  p-4 rounded-lg overflow-auto "
       />
     </div>
   );
@@ -119,13 +122,26 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       const data = await response.json();
 
       // Set the image in the editor
+      /* if (data.files[0].url) {
+        editor.chain().focus().setCustomImage({ src: data.files[0].url }).run();
+      } */
+      // Insérer l'image dans l'éditeur en utilisant votre extension customImage
       if (data.files[0].url) {
-        editor.chain().focus().setImage({ src: data.files[0].url }).run();
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: 'customImage',
+            attrs: { src: data.files[0].url },
+          })
+          .run();
       }
     } catch (error) {
       let errorMessage = "Erreur lors de l'envoi de l'image";
       // Check if the error is an instance of Error
       if (error instanceof Error) {
+        console.log(error.message);
+
         errorMessage = error.message;
 
         if (error.message.includes('Bad input file')) {

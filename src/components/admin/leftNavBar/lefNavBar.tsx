@@ -25,7 +25,7 @@ export default function LeftNavBar({
   // Nav content
   const NavContent = () => (
     <nav 
-    className="flex flex-col p-2 bg-adminDashboardNavBar sm:shadow-adminNavBarRightSahdow text-textPrimary w-full"
+    className="flex flex-col  p-2 bg-adminDashboardNavBar   text-textPrimary w-full"
     aria-label='Navigation principale'
     >
       {navItems.map((item) => (
@@ -42,8 +42,8 @@ export default function LeftNavBar({
   );
 
   return (
-    <div className="h-full">
-      <div className="hidden sm:flex w-50 h-full">
+    <div className="h-full z-10 sm:shadow-lg sm:shadow-gray-500 ">
+      <div className="hidden z-10 sm:flex w-50 h-full ">
         <NavContent />
       </div>
 

@@ -1,0 +1,58 @@
+/* Basic editor styles */
+.tiptap {
+    :first-child {
+        margin-top: 0;
+        width: 100%;
+    }
+
+    img {
+        display: block;
+        height: auto;
+        width: 100%;
+        margin: 1.5rem 0;
+        max-width: 100%;
+  
+
+    }
+
+    /* Exemple de style pour afficher la poignée uniquement en cas de sélection */
+    .selected-image .custom-handle {
+        display: block;
+        position: absolute;
+        right: -5px;
+        bottom: -5px;
+        width: 10px;
+        height: 10px;
+        background: #d47113;
+        cursor: se-resize;
+    }
+
+    .react-resizable, .react-renderer {
+        max-width: fit-content;
+        max-height: fit-content;
+    }
+
+
+    
+    /* Masquer la poignée par défaut si non sélectionnée */
+    .custom-handle {
+        display: none;
+    }
+    
+    .custom-image {
+        display: block;
+        width: 100%;
+        max-width: fit-content;
+        height: 100%;
+        max-height: fit-content;
+        object-fit: contain;
+        border-radius: 0.5rem;
+    }
+    
+    .custom-image.selected {
+        border: 2px solid #d47113;
+        cursor: move;
+    }
+}
+
+
