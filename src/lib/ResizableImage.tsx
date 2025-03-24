@@ -1,4 +1,5 @@
 // CustomImage.tsx
+import { useEffect, useRef, useState } from '@/components/ui';
 import { Node, mergeAttributes } from '@tiptap/core';
 import {
   ReactNodeViewRenderer,
@@ -7,6 +8,7 @@ import {
 } from '@tiptap/react';
 import { ResizableBox, ResizableBoxProps } from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import { text } from 'stream/consumers';
 
 export const CustomImage = Node.create({
   name: 'customImage',
@@ -22,9 +24,9 @@ export const CustomImage = Node.create({
       title: { default: null },
       width: { default: 'auto' },
       height: { default: 'auto' },
+      textAlign: { default: 'left' },
     };
   },
-
 
   parseHTML() {
     return [
@@ -51,7 +53,16 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
   props
 ) => {
   const { node, updateAttributes, selected } = props;
-  const { src, width, height } = node.attrs;
+  const { src, width, height, textAlign } = node.attrs;
+
+  const isResizingRef = useRef(false); // Pour un accès synchrone aux événements
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Fonction appelée lors du début du redimensionnement 
+  const onResizeStart = () => {
+    isResizingRef.current = true;
+    setIsResizing(true); // Force le re-render pour draggable={false}
+  };
 
   // Récupérer la largeur du conteneur parent (assurez-vous que la classe correspond)
   const container = document.querySelector('.editor-content');
@@ -60,32 +71,52 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
   const initialWidth = width === 'auto' ? 200 : parseInt(width);
   const initialHeight = height === 'auto' ? 200 : parseInt(height);
 
-const onResizeStop: ResizableBoxProps['onResizeStop'] = (event, { size }) => {
-  updateAttributes({
-    width: `${size.width}px`,
-    height: `${size.height}px`,
-  });
-};
+  // Fonction appelée lors de l'arrêt du redimensionnement
+  const onResizeStop: ResizableBoxProps['onResizeStop'] = (event, { size }) => {
+    isResizingRef.current = false;
+    setIsResizing(false);
+    updateAttributes({
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+    });
+  };
   return (
-    <NodeViewWrapper className={selected ? 'selected-image' : ''}>
+    <NodeViewWrapper 
+    className={`custom-image-wrapper ${selected ? 'selected-image' : ''}`}
+    data-text-align={textAlign}
+     // On empêche le drag du NodeViewWrapper pendant le resizing
+    onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
+     if (isResizingRef.current) {
+       event.preventDefault();
+       event.stopPropagation();
+     }
+      }}
+      style={{ 
+      // Empêche tout comportement de sélection/texte pendant le resize
+      userSelect: isResizing ? 'none' : 'auto',
+      pointerEvents: isResizing ? 'none' : 'auto' 
+    }}
+      >
       <ResizableBox
         width={initialWidth}
         height={initialHeight}
+        onResizeStart={onResizeStart}
         onResizeStop={onResizeStop}
         minConstraints={[50, 50]}
         maxConstraints={[maxWidth, Infinity]}
-        /* axis="both" */
         handle={
           selected ? (
             <span
               className="custom-handle"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
+              onMouseDown={(event) => {
+                setIsResizing(true);
+                event.stopPropagation();
+                event.preventDefault();
               }}
-              onDragStart={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
+              onDragStart={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                onResizeStart();
               }}
             />
           ) : undefined
@@ -95,8 +126,7 @@ const onResizeStop: ResizableBoxProps['onResizeStop'] = (event, { size }) => {
           src={src}
           className={`custom-image shadow-lg shadow-gray-600 ${selected ? 'selected' : ''}`}
           alt={node.attrs.alt || ''}
-          /* style={{ width: '100%', height: '100%' }} */
-            />
+        />
       </ResizableBox>
     </NodeViewWrapper>
   );

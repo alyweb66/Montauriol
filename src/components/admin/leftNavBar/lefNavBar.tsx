@@ -42,7 +42,7 @@ export default function LeftNavBar({
   );
 
   return (
-    <div className="h-full z-10 sm:shadow-lg sm:shadow-gray-500 ">
+    <div className="h-full z-10 sm:shadow-lg sm:shadow-gray-950 ">
       <div className="hidden z-10 sm:flex w-50 h-full ">
         <NavContent />
       </div>

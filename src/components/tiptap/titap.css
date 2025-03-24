@@ -5,14 +5,30 @@
         width: 100%;
     }
 
+    /* permet le texte autour de l'image */
+    p {
+        clear: none;
+        /* Permettre l'habillage */
+        overflow: hidden;
+        /* Contenir les floats */
+    }
+
     img {
         display: block;
         height: auto;
         width: 100%;
         margin: 1.5rem 0;
         max-width: 100%;
-  
 
+
+    }
+
+    .editor-content {
+        overflow: auto;
+    }
+
+    .selected-image {
+        position: relative;
     }
 
     /* Exemple de style pour afficher la poignée uniquement en cas de sélection */
@@ -25,20 +41,31 @@
         height: 10px;
         background: #d47113;
         cursor: se-resize;
+        z-index: 20;
+        /*   pointer-events:all, */
+
     }
 
-    .react-resizable, .react-renderer {
+
+    .react-renderer {
+        max-width: 100%;
+        max-height: fit-content;
+       /*  margin-top: 0.5rem;
+        margin-bottom: 1rem; */
+    }
+
+    .react-resizable {
         max-width: fit-content;
         max-height: fit-content;
+
     }
 
 
-    
     /* Masquer la poignée par défaut si non sélectionnée */
     .custom-handle {
         display: none;
     }
-    
+
     .custom-image {
         display: block;
         width: 100%;
@@ -47,12 +74,57 @@
         max-height: fit-content;
         object-fit: contain;
         border-radius: 0.5rem;
+
     }
-    
+
+    .custom-image-wrapper {
+        z-index: 20;
+    }
+
+
     .custom-image.selected {
         border: 2px solid #d47113;
         cursor: move;
     }
+
+    /* Alignement et texte autour */
+    .custom-image-wrapper[data-text-align="left"] {
+        float: left;
+        margin: 0.5rem 1rem 1rem 0;
+        max-width: fit-content;
+
+    }
+
+    .custom-image-wrapper[data-text-align="right"] {
+        float: right;
+        margin: 0.5rem 0 1rem 1rem;
+        max-width: fit-content;
+    }
+
+    .custom-image-wrapper[data-text-align="center"] {
+        display: flex;
+        justify-content: center;
+        margin: 0.5rem auto 1rem auto;
+    }
+
+    /* Youtube embed */
+    div[data-youtube-video] {
+        cursor: move;
+        padding-right: 1.5rem;
+
+        iframe {
+            border: 0.5rem solid var(--black-contrast);
+            display: block;
+            min-height: 200px;
+            min-width: 200px;
+            outline: 0px solid transparent;
+        }
+
+    }
+
+    .ProseMirror-selectednode iframe {
+        outline: 3px solid var(--purple);
+        transition: outline 0.15s;
+    }
+
 }
-
-

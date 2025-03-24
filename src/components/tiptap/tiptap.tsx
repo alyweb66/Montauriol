@@ -2,8 +2,9 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
+import TextAlign from '@tiptap/extension-text-align';
 import { CustomImage } from '../../lib/ResizableImage';
+import Youtube from '@tiptap/extension-youtube';
 import {
   FormatBoldIcon,
   FormatItalicIcon,
@@ -19,6 +20,10 @@ import {
   ImageIcon,
   toast,
   useState,
+  FormatAlignLeftIcon,
+  FormatAlignCenterIcon,
+  FormatAlignRightIcon,
+  YouTubeIcon,
 } from '../ui';
 import './titap.css';
 
@@ -26,7 +31,17 @@ const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
   const editor = useEditor({
-    extensions: [StarterKit, CustomImage],
+    extensions: [
+      StarterKit,
+      CustomImage,
+      TextAlign.configure({
+        types: ['heading', 'paragraph', 'customImage'],
+      }),
+      Youtube.configure({
+        controls: false,
+        nocookie: true,
+      }),
+    ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
       // Get the current images
@@ -74,6 +89,11 @@ const TiptapEditor = () => {
       // Update the previous images
       setPreviousImages(currentImages);
     },
+    editorProps: {
+      attributes: {
+        spellcheck: 'false',
+      },
+    },
   });
 
   if (!editor) return <p>Chargement…</p>;
@@ -95,6 +115,10 @@ type MenuBarProps = {
 
 const MenuBar = ({ editor }: MenuBarProps) => {
   if (!editor) return null;
+
+  // State
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
 
   // Upload media
   const handleFileChange = async (
@@ -155,6 +179,19 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     }
   };
 
+  // YouTube video
+  const addYoutubeVideo = () => {
+    const url = prompt('Enter YouTube URL');
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: Math.max(320, parseInt(width, 10)) || 640,
+        height: Math.max(180, parseInt(height, 10)) || 480,
+      });
+    }
+  };
+
   return (
     <div className=" w-full border-b-1 border-gray-200 pb-1">
       <button
@@ -205,6 +242,42 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         }`}
       >
         <FormatStrikethroughIcon />
+      </button>
+      <button
+        title="Aligner à gauche"
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        className={`p-1 rounded-full m-1  ${
+          editor.isActive({ textAlign: 'left' })
+            ? 'bg-[image:var(--color-adminButton)] text-white'
+            : 'bg-white text-black'
+        }`}
+      >
+        <FormatAlignLeftIcon />
+      </button>
+      <button
+        title="Aligner au centre"
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        className={`p-1 rounded-full m-1  ${
+          editor.isActive({ textAlign: 'center' })
+            ? 'bg-[image:var(--color-adminButton)] text-white'
+            : 'bg-white text-black'
+        }`}
+      >
+        <FormatAlignCenterIcon />
+      </button>
+      <button
+        title="Aligner à droite"
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        className={`p-1 rounded-full m-1  ${
+          editor.isActive({ textAlign: 'right' })
+            ? 'bg-[image:var(--color-adminButton)] text-white'
+            : 'bg-white text-black'
+        }`}
+      >
+        <FormatAlignRightIcon />
       </button>
       <button
         title="Citation"
@@ -279,6 +352,15 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         aria-label="Ajouter une image"
       >
         <ImageIcon />
+      </button>
+      <button
+        title="Ajouter une vidéo YouTube"
+        type="button"
+        id="add"
+        className="p-1 rounded-full m-1"
+        onClick={addYoutubeVideo}
+      >
+        <YouTubeIcon />
       </button>
       <button
         title="Annuler"

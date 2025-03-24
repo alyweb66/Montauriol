@@ -1,5 +1,5 @@
 // React components
-export { useState, useEffect } from 'react';
+export { useState, useEffect, useRef } from 'react';
 
 
 // MUI components
@@ -37,3 +37,7 @@ export { default as FormatQuoteIcon } from '@mui/icons-material/FormatQuote';
 export { default as TitleIcon } from '@mui/icons-material/Title';
 export { default as HorizontalRuleIcon } from '@mui/icons-material/HorizontalRule';
 export { default as ImageIcon } from '@mui/icons-material/Image';
+export { default as FormatAlignLeftIcon } from '@mui/icons-material/FormatAlignLeft';
+export { default as FormatAlignRightIcon } from '@mui/icons-material/FormatAlignRight';
+export { default as FormatAlignCenterIcon } from '@mui/icons-material/FormatAlignCenter';
+export { default as YouTubeIcon } from '@mui/icons-material/YouTube';
