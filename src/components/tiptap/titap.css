@@ -1,5 +1,20 @@
 /* Basic editor styles */
 .tiptap {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem;
+        scrollbar-width: thin; /* For Firefox */
+    
+    
+    .tiptap::-webkit-scrollbar {
+        width: 8px; /* Fallback for Chrome, Safari, and others */
+    }
+    
+    .tiptap::-webkit-scrollbar-thumb {
+        background-color: #ccc; /* Customize scrollbar thumb color */
+        border-radius: 4px;
+    }
+    height: 30rem;
     :first-child {
         margin-top: 0;
         width: 100%;
@@ -37,12 +52,12 @@
         position: absolute;
         right: -5px;
         bottom: -5px;
-        width: 10px;
-        height: 10px;
-        background: #d47113;
+        width: 15px;
+        height: 15px;
+        background: #F29B20;
         cursor: se-resize;
         z-index: 20;
-        /*   pointer-events:all, */
+       
 
     }
 
@@ -83,7 +98,7 @@
 
 
     .custom-image.selected {
-        border: 2px solid #d47113;
+        border: 2px solid #e17100;
         cursor: move;
     }
 
@@ -104,7 +119,7 @@
     .custom-image-wrapper[data-text-align="center"] {
         display: flex;
         justify-content: center;
-        margin: 0.5rem auto 1rem auto;
+        margin: 0.5rem 0 1rem 0;
     }
 
     /* Youtube embed */

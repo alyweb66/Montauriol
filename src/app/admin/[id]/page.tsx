@@ -20,7 +20,7 @@ export default function AdminDashboard() {
       <div className="flex h-full ">
         <LeftNavBar isDrawerOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
         <section className="w-full h-full flex justify-center items-center bg-[image:var(--color-adminDashboardBg)] ">
-          <div className='bg-white p-4 rounded-lg shadow-xl w-3xl max-h-80'>
+          <div className='bg-white p-4 rounded-lg shadow-xl w-3xl '>
             <Tiptap />
           </div>
      

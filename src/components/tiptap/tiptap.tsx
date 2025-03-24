@@ -103,7 +103,7 @@ const TiptapEditor = () => {
       <MenuBar editor={editor} />
       <EditorContent
         editor={editor}
-        className="editor-content min-h-70 w-full  p-4 rounded-lg overflow-auto "
+        className="editor-content w-full p-2 rounded-lg "
       />
     </div>
   );
@@ -181,7 +181,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
 
   // YouTube video
   const addYoutubeVideo = () => {
-    const url = prompt('Enter YouTube URL');
+    const url = prompt('Entrez l\'URL de la vidéo YouTube');
 
     if (url) {
       editor.commands.setYoutubeVideo({
@@ -195,7 +195,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
   return (
     <div className=" w-full border-b-1 border-gray-200 pb-1">
       <button
-        title="Titre 1"
+        title="Taille titre"
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={`p-1 rounded-full m-1  ${
@@ -292,7 +292,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         <FormatQuoteIcon />
       </button>
       <button
-        title="Horizontal rule"
+        title="Séparateur horizontal"
         type="button"
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
       >
@@ -362,6 +362,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <YouTubeIcon />
       </button>
+      
       <button
         title="Annuler"
         type="button"

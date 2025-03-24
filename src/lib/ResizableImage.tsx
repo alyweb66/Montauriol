@@ -113,6 +113,7 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
                 event.stopPropagation();
                 event.preventDefault();
               }}
+              onMouseUp={() => setIsResizing(false)}
               onDragStart={(event) => {
                 event.stopPropagation();
                 event.preventDefault();
