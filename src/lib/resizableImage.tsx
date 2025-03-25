@@ -8,7 +8,7 @@ import {
 } from '@tiptap/react';
 import { ResizableBox, ResizableBoxProps } from 'react-resizable';
 import 'react-resizable/css/styles.css';
-import { text } from 'stream/consumers';
+
 
 export const CustomImage = Node.create({
   name: 'customImage',

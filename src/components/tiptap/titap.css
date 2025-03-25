@@ -3,18 +3,12 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5rem;
-        scrollbar-width: thin; /* For Firefox */
-    
-    
-    .tiptap::-webkit-scrollbar {
-        width: 8px; /* Fallback for Chrome, Safari, and others */
-    }
-    
-    .tiptap::-webkit-scrollbar-thumb {
-        background-color: #ccc; /* Customize scrollbar thumb color */
-        border-radius: 4px;
-    }
+    scrollbar-width: thin;
+    /* Fallback for unsupported browsers */
+
+
     height: 30rem;
+
     :first-child {
         margin-top: 0;
         width: 100%;
@@ -57,15 +51,17 @@
         background: #F29B20;
         cursor: se-resize;
         z-index: 20;
-       
+
 
     }
 
 
     .react-renderer {
+       /*  width: fit-content;
+        height: 360px; */
         max-width: 100%;
         max-height: fit-content;
-       /*  margin-top: 0.5rem;
+        /*  margin-top: 0.5rem;
         margin-bottom: 1rem; */
     }
 
@@ -98,8 +94,11 @@
 
 
     .custom-image.selected {
-        border: 2px solid #e17100;
+        outline: 3px solid #e17100;
         cursor: move;
+        -webkit-user-select: none;
+        user-select: none;
+        pointer-events: none;
     }
 
     /* Alignement et texte autour */
@@ -122,24 +121,42 @@
         margin: 0.5rem 0 1rem 0;
     }
 
-    /* Youtube embed */
-    div[data-youtube-video] {
-        cursor: move;
-        padding-right: 1.5rem;
 
-        iframe {
-            border: 0.5rem solid var(--black-contrast);
-            display: block;
-            min-height: 200px;
-            min-width: 200px;
-            outline: 0px solid transparent;
-        }
+    .custom-youtube-wrapper {
+        z-index: 20;
+        width: 100%;
+    }
+
+    .custom-youtube-wrapper[data-text-align="left"] {
+        float: left;
+        margin: 0.5rem 1rem 1rem 0;
+        max-width: fit-content;
+    }
+
+    .custom-youtube-wrapper[data-text-align="right"] {
+        float: right;
+        margin: 0.5rem 0 1rem 1rem;
+        max-width: fit-content;
+    }
+
+    .custom-youtube-wrapper[data-text-align="center"] {
+        display: flex;
+        justify-content: center;
+        margin: 0.5rem auto 1rem auto;
+    }
+
+    .custom-youtube {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 0.5rem;
+    }
+
+    .custom-youtube.selected {
+        outline: 3px solid #e17100;
 
     }
 
-    .ProseMirror-selectednode iframe {
-        outline: 3px solid var(--purple);
-        transition: outline 0.15s;
-    }
 
 }

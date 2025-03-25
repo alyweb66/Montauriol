@@ -3,7 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { CustomImage } from '../../lib/ResizableImage';
+import { CustomImage } from '../../lib/resizableImage';
 import Youtube from '@tiptap/extension-youtube';
 import {
   FormatBoldIcon,
@@ -26,6 +26,7 @@ import {
   YouTubeIcon,
 } from '../ui';
 import './titap.css';
+import { CustomYoutube } from '@/lib/customYoutube';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
@@ -35,12 +36,9 @@ const TiptapEditor = () => {
       StarterKit,
       CustomImage,
       TextAlign.configure({
-        types: ['heading', 'paragraph', 'customImage'],
+        types: ['heading', 'paragraph', 'customImage', 'customYoutube'],
       }),
-      Youtube.configure({
-        controls: false,
-        nocookie: true,
-      }),
+      CustomYoutube
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -179,21 +177,46 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     }
   };
 
-  // YouTube video
+
   const addYoutubeVideo = () => {
-    const url = prompt('Entrez l\'URL de la vidéo YouTube');
-
-    if (url) {
-      editor.commands.setYoutubeVideo({
+    // Demande l'URL de la vidéo YouTube
+    const url = prompt("Entrez l'URL de la vidéo YouTube");
+    if (!url) return;
+  
+    // Définition des tailles possibles
+    const sizes = [
+      { label: "Petit (320x180)", width: 320, height: 180 },
+      { label: "Moyen (640x360)", width: 640, height: 360 },
+      { label: "Grand (1280x720)", width: 1280, height: 720 },
+      { label: "Très grand (1920x1080)", width: 1920, height: 1080 },
+    ];
+  
+    // Construit le message pour le prompt
+    const sizeOptions = sizes
+      .map((s, index) => `${index + 1} : ${s.label}`)
+      .join("\n");
+  
+    const choice = prompt(
+      `Choisissez la taille de la vidéo en entrant le numéro correspondant :\n${sizeOptions}`
+    );
+  
+    // On sélectionne la taille choisie, par défaut "Moyen" si la saisie est invalide
+    const chosenSize = sizes[parseInt(choice ?? '', 10) - 1] || sizes[1];
+  
+    // Insère la vidéo avec la taille sélectionnée
+    editor.chain().focus().insertContent({
+      type: 'customYoutube',
+      attrs: {
         src: url,
-        width: Math.max(320, parseInt(width, 10)) || 640,
-        height: Math.max(180, parseInt(height, 10)) || 480,
-      });
-    }
-  };
+        width: chosenSize.width,
+        height: chosenSize.height,
+      },
+    }).run();
 
+  };
+  
   return (
-    <div className=" w-full border-b-1 border-gray-200 pb-1">
+    <div className="w-full border-b-1 border-gray-200 pb-1">
       <button
         title="Taille titre"
         type="button"

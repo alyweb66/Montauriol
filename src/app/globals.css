@@ -60,9 +60,27 @@ li {
   margin-bottom: 0.2em;
 }
 
+hr {
+  color: #C2C2C2;
+}
+
 blockquote {
-  margin-left: 0;
+  margin: 0.5em 0; /* Marge externe conservée */
+}
+
+blockquote p {
+  position: relative;
+  display: inline;
   padding-left: 1em;
-  border-left: 2px solid #ddd;
-  background-color: rgba(128, 94, 56, 0.541);
+  background: #96b351;
+}
+
+blockquote p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #b35151;
 }
