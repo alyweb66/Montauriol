@@ -20,6 +20,7 @@ export { default as OutlinedInput } from '@mui/material/OutlinedInput';
 export { default as FormGroup } from '@mui/material/FormGroup';
 export { default as FormControlLabel } from '@mui/material/FormControlLabel';
 export { default as Checkbox } from '@mui/material/Checkbox';
+export { default as Popover } from '@mui/material/Popover';
 
 // MUI icons
 export { default as Visibility } from '@mui/icons-material/Visibility';
@@ -41,3 +42,5 @@ export { default as FormatAlignLeftIcon } from '@mui/icons-material/FormatAlignL
 export { default as FormatAlignRightIcon } from '@mui/icons-material/FormatAlignRight';
 export { default as FormatAlignCenterIcon } from '@mui/icons-material/FormatAlignCenter';
 export { default as YouTubeIcon } from '@mui/icons-material/YouTube';
+export {default as FormatColorFillIcon } from '@mui/icons-material/FormatColorFill';
+export {default as FormatColorTextIcon } from '@mui/icons-material/FormatColorText';

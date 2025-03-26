@@ -4,7 +4,10 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { CustomImage } from '../../lib/resizableImage';
-import Youtube from '@tiptap/extension-youtube';
+import { CustomYoutube } from '@/lib/customYoutube';
+import Highlight from '@tiptap/extension-highlight';
+import { Color } from '@tiptap/extension-color';
+import TextStyle from '@tiptap/extension-text-style'
 import {
   FormatBoldIcon,
   FormatItalicIcon,
@@ -26,7 +29,7 @@ import {
   YouTubeIcon,
 } from '../ui';
 import './titap.css';
-import { CustomYoutube } from '@/lib/customYoutube';
+import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
@@ -38,7 +41,10 @@ const TiptapEditor = () => {
       TextAlign.configure({
         types: ['heading', 'paragraph', 'customImage', 'customYoutube'],
       }),
-      CustomYoutube
+      CustomYoutube,
+      Highlight.configure({ multicolor: true }),
+      Color.configure({ types: ['textStyle'] }),
+      TextStyle.configure({ mergeNestedSpanStyles: true }),
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -186,9 +192,8 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     // Définition des tailles possibles
     const sizes = [
       { label: "Petit (320x180)", width: 320, height: 180 },
-      { label: "Moyen (640x360)", width: 640, height: 360 },
-      { label: "Grand (1280x720)", width: 1280, height: 720 },
-      { label: "Très grand (1920x1080)", width: 1920, height: 1080 },
+      { label: "Grand (640x360)", width: 640, height: 360 },
+     
     ];
   
     // Construit le message pour le prompt
@@ -266,6 +271,12 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <FormatStrikethroughIcon />
       </button>
+  
+      <ColorPickerButton 
+      className="p-1 rounded-full m-1"
+      editor={editor} 
+      />
+  
       <button
         title="Aligner à gauche"
         type="button"

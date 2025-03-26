@@ -57,7 +57,7 @@
 
 
     .react-renderer {
-       /*  width: fit-content;
+        /*  width: fit-content;
         height: 360px; */
         max-width: 100%;
         max-height: fit-content;
@@ -158,5 +158,10 @@
 
     }
 
+    mark {
+        border-radius: 0.2rem;
+        transition: background-color 0.2s;
+    }
+    
 
 }
