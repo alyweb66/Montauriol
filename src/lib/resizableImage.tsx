@@ -17,6 +17,7 @@ export const CustomImage = Node.create({
   draggable: true,
   selectable: true,
 
+  // Add attributes
   addAttributes() {
     return {
       src: {},
@@ -28,6 +29,7 @@ export const CustomImage = Node.create({
     };
   },
 
+  // Parse HTML
   parseHTML() {
     return [
       {
@@ -36,10 +38,12 @@ export const CustomImage = Node.create({
     ];
   },
 
+  // Render HTML
   renderHTML({ HTMLAttributes }) {
     return ['img', mergeAttributes(HTMLAttributes)];
   },
 
+  // Add the node view
   addNodeView() {
     return ReactNodeViewRenderer(ResizableImageComponent, {
       stopEvent: (event) => false,
@@ -55,23 +59,23 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
   const { node, updateAttributes, selected } = props;
   const { src, width, height, textAlign } = node.attrs;
 
-  const isResizingRef = useRef(false); // Pour un accès synchrone aux événements
+  const isResizingRef = useRef(false); // Ref to keep track of resizing state
   const [isResizing, setIsResizing] = useState(false);
 
-  // Fonction appelée lors du début du redimensionnement 
+  // Start resizing
   const onResizeStart = () => {
     isResizingRef.current = true;
-    setIsResizing(true); // Force le re-render pour draggable={false}
+    setIsResizing(true); // Force re-render to prevent text selection
   };
 
-  // Récupérer la largeur du conteneur parent (assurez-vous que la classe correspond)
+  // Get the container width
   const container = document.querySelector('.editor-content');
   const maxWidth = container ? container.clientWidth : Infinity;
-  // On définit des dimensions initiales en cas de "auto"
+  // Initial width and height
   const initialWidth = width === 'auto' ? 200 : parseInt(width);
   const initialHeight = height === 'auto' ? 200 : parseInt(height);
 
-  // Fonction appelée lors de l'arrêt du redimensionnement
+  // Function called when resizing stops
   const onResizeStop: ResizableBoxProps['onResizeStop'] = (event, { size }) => {
     isResizingRef.current = false;
     setIsResizing(false);
@@ -84,7 +88,7 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
     <NodeViewWrapper 
     className={`custom-image-wrapper ${selected ? 'selected-image' : ''}`}
     data-text-align={textAlign}
-     // On empêche le drag du NodeViewWrapper pendant le resizing
+     // Stop drag events when resizing
     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
      if (isResizingRef.current) {
        event.preventDefault();
@@ -92,7 +96,7 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
      }
       }}
       style={{ 
-      // Empêche tout comportement de sélection/texte pendant le resize
+      // Stop user selection and pointer events when resizing
       userSelect: isResizing ? 'none' : 'auto',
       pointerEvents: isResizing ? 'none' : 'auto' 
     }}

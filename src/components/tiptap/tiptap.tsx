@@ -1,13 +1,14 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { CustomImage } from '../../lib/resizableImage';
 import { CustomYoutube } from '@/lib/customYoutube';
 import Highlight from '@tiptap/extension-highlight';
 import { Color } from '@tiptap/extension-color';
-import TextStyle from '@tiptap/extension-text-style'
+import TextStyle from '@tiptap/extension-text-style';
+import Link from '@tiptap/extension-link';
 import {
   FormatBoldIcon,
   FormatItalicIcon,
@@ -27,9 +28,14 @@ import {
   FormatAlignCenterIcon,
   FormatAlignRightIcon,
   YouTubeIcon,
+  useCallback,
+  AddLinkIcon,
+  LinkOffIcon,
 } from '../ui';
 import './titap.css';
 import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
+import { YoutubePopover } from './popover/youtubePopover';
+import { LinkPopover } from './popover/linkPopover';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
@@ -45,6 +51,77 @@ const TiptapEditor = () => {
       Highlight.configure({ multicolor: true }),
       Color.configure({ types: ['textStyle'] }),
       TextStyle.configure({ mergeNestedSpanStyles: true }),
+      Link.configure({
+        openOnClick: true,
+        autolink: true,
+        defaultProtocol: 'https',
+        protocols: ['http', 'https'],
+        isAllowedUri: (url, ctx) => {
+          try {
+            // construct URL
+            const parsedUrl = url.includes(':')
+              ? new URL(url)
+              : new URL(`${ctx.defaultProtocol}://${url}`);
+
+            // use default validation
+            if (!ctx.defaultValidate(parsedUrl.href)) {
+              return false;
+            }
+
+            // disallowed protocols
+            const disallowedProtocols = ['ftp', 'file', 'mailto'];
+            const protocol = parsedUrl.protocol.replace(':', '');
+
+            if (disallowedProtocols.includes(protocol)) {
+              return false;
+            }
+
+            // only allow protocols specified in ctx.protocols
+            const allowedProtocols = ctx.protocols.map((p) =>
+              typeof p === 'string' ? p : p.scheme
+            );
+
+            if (!allowedProtocols.includes(protocol)) {
+              return false;
+            }
+
+            // disallowed domains
+            const disallowedDomains = [
+              'example-phishing.com',
+              'malicious-site.net',
+            ];
+            const domain = parsedUrl.hostname;
+
+            if (disallowedDomains.includes(domain)) {
+              return false;
+            }
+
+            // all checks have passed
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        shouldAutoLink: (url) => {
+          try {
+            // construct URL
+            const parsedUrl = url.includes(':')
+              ? new URL(url)
+              : new URL(`https://${url}`);
+
+            // only auto-link if the domain is not in the disallowed list
+            const disallowedDomains = [
+              'example-no-autolink.com',
+              'another-no-autolink.com',
+            ];
+            const domain = parsedUrl.hostname;
+
+            return !disallowedDomains.includes(domain);
+          } catch {
+            return false;
+          }
+        },
+      }),
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -113,16 +190,8 @@ const TiptapEditor = () => {
   );
 };
 
-type MenuBarProps = {
-  editor: any;
-};
-
-const MenuBar = ({ editor }: MenuBarProps) => {
+const MenuBar = ({ editor }: { editor: Editor }) => {
   if (!editor) return null;
-
-  // State
-  const [width, setWidth] = useState('');
-  const [height, setHeight] = useState('');
 
   // Upload media
   const handleFileChange = async (
@@ -149,10 +218,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
 
       const data = await response.json();
 
-      // Set the image in the editor
-      /* if (data.files[0].url) {
-        editor.chain().focus().setCustomImage({ src: data.files[0].url }).run();
-      } */
       // Insérer l'image dans l'éditeur en utilisant votre extension customImage
       if (data.files[0].url) {
         editor
@@ -168,8 +233,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       let errorMessage = "Erreur lors de l'envoi de l'image";
       // Check if the error is an instance of Error
       if (error instanceof Error) {
-        console.log(error.message);
-
+  
         errorMessage = error.message;
 
         if (error.message.includes('Bad input file')) {
@@ -183,50 +247,48 @@ const MenuBar = ({ editor }: MenuBarProps) => {
     }
   };
 
+  // Set link
+  const setLink = useCallback(
+    (url: string) => {
 
-  const addYoutubeVideo = () => {
-    // Demande l'URL de la vidéo YouTube
-    const url = prompt("Entrez l'URL de la vidéo YouTube");
-    if (!url) return;
-  
-    // Définition des tailles possibles
-    const sizes = [
-      { label: "Petit (320x180)", width: 320, height: 180 },
-      { label: "Grand (640x360)", width: 640, height: 360 },
-     
-    ];
-  
-    // Construit le message pour le prompt
-    const sizeOptions = sizes
-      .map((s, index) => `${index + 1} : ${s.label}`)
-      .join("\n");
-  
-    const choice = prompt(
-      `Choisissez la taille de la vidéo en entrant le numéro correspondant :\n${sizeOptions}`
-    );
-  
-    // On sélectionne la taille choisie, par défaut "Moyen" si la saisie est invalide
-    const chosenSize = sizes[parseInt(choice ?? '', 10) - 1] || sizes[1];
-  
-    // Insère la vidéo avec la taille sélectionnée
-    editor.chain().focus().insertContent({
-      type: 'customYoutube',
-      attrs: {
-        src: url,
-        width: chosenSize.width,
-        height: chosenSize.height,
-      },
-    }).run();
+      // cancelled
+      if (url === null) {
+        return;
+      }
 
-  };
-  
+      // empty
+      if (url === '') {
+        editor.chain().focus().extendMarkRange('link').unsetLink().run();
+
+        return;
+      }
+
+      // update link
+      try {
+        editor
+          .chain()
+          .focus()
+          .extendMarkRange('link')
+          .setLink({ href: url })
+          .run();
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Une erreur est survenue');
+        }
+      }
+    },
+    [editor]
+  );
+
   return (
     <div className="w-full border-b-1 border-gray-200 pb-1">
       <button
         title="Taille titre"
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform  ${
           editor.isActive('heading', { level: 2 })
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -239,7 +301,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Gras"
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform  ${
           editor.isActive('bold')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -251,7 +313,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Italique"
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform  ${
           editor.isActive('italic')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -263,7 +325,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Barré"
         type="button"
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive('strike')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -271,17 +333,14 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       >
         <FormatStrikethroughIcon />
       </button>
-  
-      <ColorPickerButton 
-      className="p-1 rounded-full m-1"
-      editor={editor} 
-      />
-  
+
+      <ColorPickerButton className="p-1 rounded-full m-1 active:scale-80 transition transform" editor={editor} />
+
       <button
         title="Aligner à gauche"
         type="button"
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'left' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -293,7 +352,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Aligner au centre"
         type="button"
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'center' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -305,7 +364,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Aligner à droite"
         type="button"
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'right' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -317,7 +376,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Citation"
         type="button"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive('blockquote')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -328,6 +387,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Séparateur horizontal"
         type="button"
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
       >
         <HorizontalRuleIcon />
@@ -336,7 +396,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Liste à puce"
         type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`p-1 rounded-full m-1 ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive('bulletList')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -348,7 +408,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Liste numérotée"
         type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`p-1 rounded-full m-1  ${
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive('orderedList')
             ? 'bg-[image:var(--color-adminButton)] text-white'
             : 'bg-white text-black'
@@ -360,7 +420,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Sous liste"
         type="button"
-        className="p-1 rounded-full m-1"
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
         onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
         disabled={!editor.can().sinkListItem('listItem')}
       >
@@ -381,27 +441,28 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       <button
         title="Ajouter une image"
         type="button"
-        className="p-1 rounded-full m-1"
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
         onClick={() => document.getElementById('fileInput')?.click()}
         aria-label="Ajouter une image"
       >
         <ImageIcon />
       </button>
+      <YoutubePopover editor={editor} />
+      <LinkPopover editor={editor} setLink={setLink} />
       <button
-        title="Ajouter une vidéo YouTube"
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
+        title="Supprimer le lien"
         type="button"
-        id="add"
-        className="p-1 rounded-full m-1"
-        onClick={addYoutubeVideo}
+        onClick={() => editor.chain().focus().unsetLink().run()}
+        disabled={!editor.isActive('link')}
       >
-        <YouTubeIcon />
+        <LinkOffIcon />
       </button>
-      
       <button
         title="Annuler"
         type="button"
         onClick={() => editor.chain().focus().undo().run()}
-        className="p-1 rounded-full m-1  bg-white text-black"
+        className="p-1 rounded-full m-1  bg-white text-black active:scale-80 transition transform"
       >
         <UndoIcon />
       </button>
@@ -409,7 +470,7 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         title="Refaire"
         type="button"
         onClick={() => editor.chain().focus().redo().run()}
-        className="p-1 rounded-full m-1 bg-white text-black"
+        className="p-1 rounded-full m-1 bg-white text-black active:scale-80 transition transform"
       >
         <RedoIcon />
       </button>

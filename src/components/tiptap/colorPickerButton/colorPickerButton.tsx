@@ -27,9 +27,6 @@ export const ColorPickerButton = ({
     setAnchorEl(event.currentTarget);
   };
 
-  // Utilisez une variablequi change sa valeurlorsqu'un élément change
-  // pour déterminer si vous devez changer la couleur du texte ou du surlignage
-
   // Close the popover
   const handleClose = () => {
     setIsTextColor(false);

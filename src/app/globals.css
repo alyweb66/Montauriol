@@ -16,6 +16,8 @@
   --color-adminButton: radial-gradient(ellipse at top left, #e17100, #F29B20);
   --color-selectedAdmin: #e17100;
   --color-secondarySelectedAdmin: #F29B20;
+  --color-backgroundHoverButton: #ee98182c;
+  --color-textButton: #ffa500;
  /*  --color-adminButtonHover: radial-gradient(ellipse at top left, #e17100, #F29B20); */
   /* --color-adminButton: theme(colors.amber.600); */
   --color-hoverAdminButton: radial-gradient(ellipse at top left, #F29B20, #e17100);
@@ -72,7 +74,7 @@ blockquote p {
   position: relative;
   display: inline;
   padding-left: 1em;
-  background: #96b351;
+  background: orange;
 }
 
 blockquote p::before {

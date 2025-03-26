@@ -163,5 +163,22 @@
         transition: background-color 0.2s;
     }
     
+    code {
+        background-color: purple;
+        border-radius: 0.4rem;
+        color: black;
+        font-size: 0.85rem;
+        padding: 0.25em 0.3em;
+      }
+    
+      /* Link styles */
+      a {
+        color: purple;
+        cursor: pointer;
+        text-decoration: underline;
+        &:hover {
+          color: rgb(77, 16, 77);
+        }
+      }
 
 }
