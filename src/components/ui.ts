@@ -26,6 +26,9 @@ export { default as ListItemButton } from '@mui/material/ListItemButton';
 export { default as Typography } from '@mui/material/Typography';
 export { default as Box } from '@mui/material/Box';
 export { default as Divider } from '@mui/material/Divider';
+export { default as Select } from '@mui/material/Select';
+export { default as MenuItem } from '@mui/material/MenuItem';
+export { default as SelectChangeEvent } from '@mui/material/Select';
 
 // MUI icons
 export { default as Visibility } from '@mui/icons-material/Visibility';

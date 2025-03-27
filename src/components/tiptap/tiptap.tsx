@@ -30,14 +30,19 @@ import {
   useCallback,
   LinkOffIcon,
   FormatUnderlinedIcon,
+  Select,
+  MenuItem,
 } from '../ui';
 import './titap.css';
 import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
 import { YoutubePopover } from './popover/youtubePopover';
 import { LinkPopover } from './popover/linkPopover';
 import Underline from '@tiptap/extension-underline';
-import Typography from '@tiptap/extension-typography'
-import Placeholder from '@tiptap/extension-placeholder'
+import Typography from '@tiptap/extension-typography';
+import Placeholder from '@tiptap/extension-placeholder';
+import FontFamily from '@tiptap/extension-font-family';
+import { SelectChangeEvent } from '@mui/material/Select';
+import { fontFamily } from './font';
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
@@ -142,6 +147,7 @@ const TiptapEditor = () => {
         //   return 'Can you add some further context?'
         // },
       }),
+      FontFamily,
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -363,6 +369,88 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       >
         <FormatUnderlinedIcon />
       </button>
+      <Select
+        value={
+          editor.isActive('textStyle', { fontFamily: 'Inter' })
+            ? 'Inter'
+            : editor.getAttributes('textStyle').fontFamily || 'default'
+        }
+        onChange={(event: SelectChangeEvent) => {
+          const font =
+            event.target.value === 'default' ? null : event.target.value;
+          editor
+            .chain()
+            .focus()
+            .setFontFamily(font || '')
+            .run();
+        }}
+        sx={{
+          height: '32px',
+          width: '120px',
+          fontSize: '0.875rem',
+          borderRadius: '9999px',
+          margin: '0.25rem',
+          '& .MuiSelect-select': {
+            padding: '4px 32px 4px 12px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: '1.5',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            border: '1px solid #e0e0e0',
+            borderRadius: '0.6rem',
+          },
+          backgroundColor: editor.isActive('textStyle', { fontFamily: 'Inter' })
+            ? '#ffffff'
+            : '#ffffff',
+          color: editor.isActive('textStyle', { fontFamily: 'Inter' })
+            ? '#000000'
+            : '#000000',
+          '& .MuiSvgIcon-root': {
+            color: editor.isActive('textStyle', { fontFamily: 'Inter' })
+              ? '#000000'
+              : '#000000',
+            right: '4px',
+          },
+        }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              // Style menu
+              borderRadius: '8px',
+              marginTop: '4px',
+
+              // Selected style item
+              '& .MuiMenuItem-root.Mui-selected': {
+                backgroundColor:
+                  'var(--color-backgroundHoverButton) !important',
+                color: 'black !important',
+              },
+            },
+          },
+        }}
+        variant="outlined"
+      >
+        {fontFamily.map((font) => (
+          <MenuItem
+            key={font.value}
+            value={font.value}
+            sx={{
+              ...font.style,
+              // Style cohérent pour toutes les options
+              fontSize: '0.875rem',
+              minHeight: '32px',
+              // Aperçu immédiat de la police
+              '&:not(:first-of-type)': {
+                fontFamily: font.style.fontFamily + ' !important',
+              },
+            }}
+          >
+            {font.label}
+          </MenuItem>
+        ))}
+      </Select>
       <ColorPickerButton
         className="p-1 rounded-full m-1 active:scale-80 transition transform"
         editor={editor}

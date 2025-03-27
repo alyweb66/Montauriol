@@ -1,8 +1,11 @@
+
 @import "tailwindcss";
 
 * {
   box-sizing: border-box;
 }
+
+
 
 @theme {
   --color-adminDashboardBg: radial-gradient(ellipse at top left, #f9fafb, #d1d5dc);
@@ -16,8 +19,8 @@
   --color-adminButton: radial-gradient(ellipse at top left, #e17100, #F29B20);
   --color-selectedAdmin: #e17100;
   --color-secondarySelectedAdmin: #F29B20;
-  --color-backgroundHoverButton: #ee98182c;
-  --color-textButton: #ffa500;
+  --color-backgroundHoverButton: #ee98182c; /* orange light */
+  --color-textButton: #ffa500; /* orange */
  /*  --color-adminButtonHover: radial-gradient(ellipse at top left, #e17100, #F29B20); */
   /* --color-adminButton: theme(colors.amber.600); */
   --color-hoverAdminButton: radial-gradient(ellipse at top left, #F29B20, #e17100);
@@ -26,11 +29,11 @@
   --color-textPrimary: #ffffff;
   --color-textSecondary: #000000;
   --font-roboto: Roboto, sans-serif;
+  --font-openSans: Open-Sans, sans-serif;
+  --font-monterrat: Montserrat, sans-serif;
+  --font-Lato: Lato, sans-serif;
 
 }
-
-
-
 
 
 html,
@@ -86,3 +89,4 @@ blockquote p::before {
   width: 3px;
   background: #b35151;
 }
+

@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
         '.json',
       ],
     },
+    optimizePackageImports: ["@mui/material"],
   },
   /* config options here */
 };
