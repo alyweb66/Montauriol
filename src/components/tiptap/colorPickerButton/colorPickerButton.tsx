@@ -10,7 +10,6 @@ import {
 type ColorPickerButtonProps = {
   editor: any;
   className?: string;
-  isColorText?: boolean;
 };
 
 export const ColorPickerButton = ({

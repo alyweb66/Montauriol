@@ -3,7 +3,7 @@
 .tiptap {
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0.5rem;
+    /* padding: 0.5rem; */
     scrollbar-width: thin;
     height: 30rem;
 
