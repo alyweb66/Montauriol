@@ -9,7 +9,6 @@ import {
 import { ResizableBox, ResizableBoxProps } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 
-
 export const CustomImage = Node.create({
   name: 'customImage',
   group: 'block',
@@ -85,22 +84,22 @@ const ResizableImageComponent: React.FC<ResizableImageComponentProps> = (
     });
   };
   return (
-    <NodeViewWrapper 
-    className={`custom-image-wrapper ${selected ? 'selected-image' : ''}`}
-    data-text-align={textAlign}
-     // Stop drag events when resizing
-    onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
-     if (isResizingRef.current) {
-       event.preventDefault();
-       event.stopPropagation();
-     }
+    <NodeViewWrapper
+      className={`custom-image-wrapper ${selected ? 'selected-image' : ''}`}
+      data-text-align={textAlign}
+      // Stop drag events when resizing
+      onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
+        if (isResizingRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }}
-      style={{ 
-      // Stop user selection and pointer events when resizing
-      userSelect: isResizing ? 'none' : 'auto',
-      pointerEvents: isResizing ? 'none' : 'auto' 
-    }}
-      >
+      style={{
+        // Stop user selection and pointer events when resizing
+        userSelect: isResizing ? 'none' : 'auto',
+        pointerEvents: isResizing ? 'none' : 'auto',
+      }}
+    >
       <ResizableBox
         width={initialWidth}
         height={initialHeight}

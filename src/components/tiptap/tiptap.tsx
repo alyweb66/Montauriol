@@ -19,7 +19,6 @@ import {
   RedoIcon,
   SegmentIcon,
   UndoIcon,
-  TitleIcon,
   HorizontalRuleIcon,
   ImageIcon,
   toast,
@@ -30,6 +29,7 @@ import {
   useCallback,
   LinkOffIcon,
   FormatUnderlinedIcon,
+  Popover,
 } from '../ui';
 import './titap.css';
 import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
@@ -40,6 +40,8 @@ import Typography from '@tiptap/extension-typography';
 import Placeholder from '@tiptap/extension-placeholder';
 import FontFamily from '@tiptap/extension-font-family';
 import { TextFormatSelect } from './select/select';
+import EmojiPicker, { Theme, EmojiStyle } from 'emoji-picker-react';
+import Image from '@tiptap/extension-image'
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
@@ -145,6 +147,11 @@ const TiptapEditor = () => {
         // },
       }),
       FontFamily,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'emoji',
+        },
+      })
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -215,7 +222,16 @@ const TiptapEditor = () => {
 
 const MenuBar = ({ editor }: { editor: Editor }) => {
   if (!editor) return null;
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  
+  const handleEmojiClick = (emojiObject: any) => {
+    console.log('emojiObject', emojiObject);
+    
+    editor.chain().focus().setImage({ src: emojiObject.imageUrl }).run();
 
+  };
+  
+  
   // Upload media
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -500,6 +516,36 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       >
         <RedoIcon />
       </button>
+      <button
+        title="Insérer un emoji"
+        type="button"
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        className="p-1 rounded-full m-1 active:scale-80 transition-transform bg-white text-black"
+      >
+        😀
+      </button>
+
+      <Popover
+              open={Boolean(anchorEl)}
+              anchorEl={anchorEl}
+              onClose={() => setAnchorEl(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            >
+        <div /* className="absolute z-50 top-12 right-4" */>
+          <EmojiPicker
+            onEmojiClick={handleEmojiClick}
+            autoFocusSearch={false}
+            theme={Theme.LIGHT}
+            lazyLoadEmojis={true}
+            emojiStyle={EmojiStyle.FACEBOOK}
+            skinTonesDisabled
+            searchDisabled={true}
+            height={350}
+            width={300}
+            previewConfig={{ showPreview: false }}
+          />
+        </div>
+      </Popover>
     </div>
   );
 };

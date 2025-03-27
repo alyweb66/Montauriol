@@ -22,15 +22,7 @@
         /* Contenir les floats */
     }
 
-    img {
-        display: block;
-        height: auto;
-        width: 100%;
-        margin: 1.5rem 0;
-        max-width: 100%;
 
-
-    }
 
     .editor-content {
         overflow: auto;
@@ -180,6 +172,13 @@
         &:hover {
             color: rgb(77, 16, 77);
         }
+    }
+
+    .emoji {
+        display: inline;
+        vertical-align: text-bottom;
+        width: 24px;
+        height: 24px;
     }
 
 }
