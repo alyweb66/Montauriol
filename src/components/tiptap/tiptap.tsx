@@ -27,22 +27,28 @@ import {
   FormatAlignLeftIcon,
   FormatAlignCenterIcon,
   FormatAlignRightIcon,
-  YouTubeIcon,
   useCallback,
-  AddLinkIcon,
   LinkOffIcon,
+  FormatUnderlinedIcon,
 } from '../ui';
 import './titap.css';
 import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
 import { YoutubePopover } from './popover/youtubePopover';
 import { LinkPopover } from './popover/linkPopover';
+import Underline from '@tiptap/extension-underline';
+import Typography from '@tiptap/extension-typography'
+import Placeholder from '@tiptap/extension-placeholder'
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        dropcursor: {
+          color: '#e17100', // Remplace la couleur par défaut par du rouge
+        },
+      }),
       CustomImage,
       TextAlign.configure({
         types: ['heading', 'paragraph', 'customImage', 'customYoutube'],
@@ -121,6 +127,20 @@ const TiptapEditor = () => {
             return false;
           }
         },
+      }),
+      Underline,
+      Typography,
+      Placeholder.configure({
+        // Use a placeholder:
+        placeholder: 'Tapez votre texte ici …',
+        // Use different placeholders depending on the node type:
+        // placeholder: ({ node }) => {
+        //   if (node.type.name === 'heading') {
+        //     return 'What’s the title?'
+        //   }
+
+        //   return 'Can you add some further context?'
+        // },
       }),
     ],
     immediatelyRender: false,
@@ -233,7 +253,6 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       let errorMessage = "Erreur lors de l'envoi de l'image";
       // Check if the error is an instance of Error
       if (error instanceof Error) {
-  
         errorMessage = error.message;
 
         if (error.message.includes('Bad input file')) {
@@ -250,7 +269,6 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
   // Set link
   const setLink = useCallback(
     (url: string) => {
-
       // cancelled
       if (url === null) {
         return;
@@ -333,8 +351,22 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       >
         <FormatStrikethroughIcon />
       </button>
-
-      <ColorPickerButton className="p-1 rounded-full m-1 active:scale-80 transition transform" editor={editor} />
+      <button
+        title="Souligner"
+        type="button"
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
+          editor.isActive('underline')
+            ? 'bg-[image:var(--color-adminButton)] text-white'
+            : 'bg-white text-black'
+        }`}
+      >
+        <FormatUnderlinedIcon />
+      </button>
+      <ColorPickerButton
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
+        editor={editor}
+      />
 
       <button
         title="Aligner à gauche"

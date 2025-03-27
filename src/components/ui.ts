@@ -51,3 +51,4 @@ export { default as FormatColorFillIcon } from '@mui/icons-material/FormatColorF
 export { default as FormatColorTextIcon } from '@mui/icons-material/FormatColorText';
 export { default as AddLinkIcon } from '@mui/icons-material/AddLink';
 export { default as LinkOffIcon } from '@mui/icons-material/LinkOff';
+export { default as FormatUnderlinedIcon } from '@mui/icons-material/FormatUnderlined';
