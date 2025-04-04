@@ -3,7 +3,6 @@ import { SketchPicker, ColorResult } from 'react-color';
 import {
   Button,
   FormatColorFillIcon,
-  FormatColorTextIcon,
   Popover,
 } from '@/components/ui';
 
@@ -12,14 +11,18 @@ type ColorPickerButtonProps = {
   className?: string;
 };
 
-export const ColorPickerButton = ({
+const useColorPicker = ({
   editor,
   className,
 }: ColorPickerButtonProps) => {
+
+  if (!editor) return;
+
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [isTextColor, setIsTextColor] = useState(false);
+  const [colorType, setColorType] = useState<'text' | 'highlight' | 'card'>('highlight');
   const [selectedColor, setSelectedColor] = useState<string>('transparent');
   const [selectedTextColor, setSelectedTextColor] = useState<string>('#000000');
+  const [selectedCardColor, setSelectedCardColor] = useState<string>('transparent');
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -28,7 +31,7 @@ export const ColorPickerButton = ({
 
   // Close the popover
   const handleClose = () => {
-    setIsTextColor(false);
+   /*  setIsTextColor(false); */
     setAnchorEl(null);
   };
 
@@ -36,10 +39,20 @@ export const ColorPickerButton = ({
   const handleChangeColor = (color: ColorResult) => {
     if (!editor) return;
 
-    if (isTextColor) {
-      editor.chain().focus().setColor(color.hex).run();
-    } else {
-      editor.chain().focus().setHighlight({ color: color.hex }).run();
+    switch (colorType) {
+      case 'text':
+        editor.chain().focus().setColor(color.hex).run();
+        break;
+      case 'highlight':
+        editor.chain().focus().setHighlight({ color: color.hex }).run();
+        break;
+      case 'card':
+        if (editor.isActive('card')) {
+          editor.chain().focus()
+            .updateAttributes('card', { backgroundColor: color.hex })
+            .run();
+        }
+        break;
     }
   };
 
@@ -47,12 +60,30 @@ export const ColorPickerButton = ({
   const handleRemoveColor = () => {
     if (!editor) return;
 
-    if (isTextColor) {
-      editor.chain().focus().unsetColor().run();
-    } else {
-      editor.chain().focus().unsetHighlight().run();
+    switch (colorType) {
+      case 'text':
+        editor.chain().focus().unsetColor().run();
+        break;
+      case 'highlight':
+        editor.chain().focus().unsetHighlight().run();
+        break;
+      case 'card':
+        editor.chain().focus()
+          .updateAttributes('card', { backgroundColor: null })
+          .run();
+        break;
     }
   };
+
+console.log('editor', editor);
+
+
+  useEffect(() => {
+    if (!editor.isActive('card')) return;
+    
+    const bgColor = editor.getAttributes('card').backgroundColor;
+    setSelectedCardColor(bgColor || 'transparent');
+  }, [editor, editor.getAttributes('card').backgroundColor]);
 
   // Update the highlight color when the editor's color changes
   useEffect(() => {
@@ -72,13 +103,55 @@ export const ColorPickerButton = ({
     }
   }, [editor.getAttributes('textStyle').color]);
 
-  return (
+  return {
+    anchorEl,
+    setAnchorEl,
+    colorType,
+    setColorType,
+    handleChangeColor,
+    handleRemoveColor,
+    setSelectedColor,
+    setSelectedTextColor,
+    setSelectedCardColor,
+    selectedColor,
+    selectedTextColor,
+    selectedCardColor,
+    handleOpen,
+    handleClose,
+    className,
+    // ... autres fonctions nécessaires
+  };
+ /*  return (
     <>
+     <button
+        className={className}
+        type="button"
+        onClick={(event) => {
+          event.preventDefault();
+          setColorType('card');
+          handleOpen(event);
+        }}
+        title="Couleur de fond de la carte"
+        style={{
+          color: selectedCardColor === 'transparent' ? '#000000' : selectedCardColor,
+        }}
+        disabled={!editor.isActive('card')}
+      >
+        <FormatColorFillIcon
+          sx={{
+            paintOrder: 'normal',
+            stroke: 'black',
+            strokeWidth: '0.3px',
+            fill: selectedCardColor === 'transparent' ? '#000000' : selectedCardColor,
+          }}
+        />
+      </button>
       <button
         className={className}
         type="button"
         onClick={(event) => {
-          event.preventDefault(), setIsTextColor(false), handleOpen(event);
+          setColorType('highlight');
+          event.preventDefault(), handleOpen(event);
         }}
         title="Couleur de surlignage"
         style={{
@@ -98,7 +171,8 @@ export const ColorPickerButton = ({
         className={className}
         type="button"
         onClick={(event) => {
-          event.preventDefault(), setIsTextColor(true), handleOpen(event);
+          setColorType('text');
+          event.preventDefault(), handleOpen(event);
         }}
         title="Couleur de texte"
         style={{ color: selectedTextColor }}
@@ -121,7 +195,247 @@ export const ColorPickerButton = ({
       >
         <div style={{ padding: '10px', position: 'relative' }}>
           <SketchPicker
-            color={isTextColor ? selectedTextColor : selectedColor}
+           color={
+            colorType === 'text' ? selectedTextColor :
+            colorType === 'highlight' ? selectedColor :
+            selectedCardColor
+          }
+            onChange={handleChangeColor}
+            disableAlpha={true}
+          />
+          <Button
+            type="button"
+            title="Enlever la couleur"
+            onClick={(event) => {
+              event.preventDefault();
+
+              handleRemoveColor();
+            }}
+            sx={{
+              marginTop: '0.5rem',
+              color: 'var(--color-textPrimary)',
+              backgroundImage: 'var(--color-adminButton)',
+              '&:hover': {
+                backgroundImage: 'var(--color-hoverAdminButton)',
+              },
+            }}
+          >
+            Enlever la couleur
+          </Button>
+        </div>
+      </Popover>
+    </>
+  ); */
+};
+
+// CardColorButton.tsx
+export const CardColorButton = ({ editor, className }: ColorPickerButtonProps) => {
+  const colorPicker = useColorPicker({editor, className});
+console.log('colorPicker', colorPicker);
+
+  console.log('editor card', editor);
+  if (!colorPicker) return null;
+
+  const { 
+    anchorEl, 
+    setAnchorEl, 
+    setColorType,
+    selectedCardColor,
+    handleChangeColor,
+    handleRemoveColor,
+    handleClose,
+    colorType,
+    selectedTextColor,
+    selectedColor,
+  } = colorPicker;
+
+  if (!editor) return null;
+
+  return (
+    <>
+      <button
+      title='Couleur de fond de la carte'
+        type="button"
+        className={className}
+        onClick={(e) => {
+          e.preventDefault();
+          setColorType('card');
+          setAnchorEl(e.currentTarget);
+        }}
+        disabled={!editor.isActive('card')}
+      >
+        <FormatColorFillIcon />
+      </button>
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <div style={{ padding: '10px', position: 'relative' }}>
+          <SketchPicker
+           color={
+            colorType === 'text' ? selectedTextColor :
+            colorType === 'highlight' ? selectedColor :
+            selectedCardColor
+          }
+            onChange={handleChangeColor}
+            disableAlpha={true}
+          />
+          <Button
+            type="button"
+            title="Enlever la couleur"
+            onClick={(event) => {
+              event.preventDefault();
+
+              handleRemoveColor();
+            }}
+            sx={{
+              marginTop: '0.5rem',
+              color: 'var(--color-textPrimary)',
+              backgroundImage: 'var(--color-adminButton)',
+              '&:hover': {
+                backgroundImage: 'var(--color-hoverAdminButton)',
+              },
+            }}
+          >
+            Enlever la couleur
+          </Button>
+        </div>
+      </Popover>
+    </>
+  );
+};
+
+// CardColorButton.tsx
+export const TextColorButton = ({ editor, className }: ColorPickerButtonProps) => {
+  const colorPicker = useColorPicker({editor, className});
+
+  if (!colorPicker) return null;
+
+  const { 
+    anchorEl, 
+    setAnchorEl, 
+    setColorType,
+    selectedCardColor ,
+    handleChangeColor,
+    handleRemoveColor,
+    handleClose,
+    colorType,
+    selectedTextColor,
+    selectedColor,
+  } = colorPicker;
+
+  if (!editor) return null;
+
+  return (
+    <>
+      <button
+        title='Couleur de texte'
+        type="button"
+        className={className}
+        onClick={(e) => {
+          e.preventDefault();
+          setColorType('card');
+          setAnchorEl(e.currentTarget);
+        }}
+        disabled={!editor.isActive('card')}
+      >
+        <FormatColorFillIcon />
+      </button>
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <div style={{ padding: '10px', position: 'relative' }}>
+          <SketchPicker
+           color={
+            colorType === 'text' ? selectedTextColor :
+            colorType === 'highlight' ? selectedColor :
+            selectedCardColor
+          }
+            onChange={handleChangeColor}
+            disableAlpha={true}
+          />
+          <Button
+            type="button"
+            title="Enlever la couleur"
+            onClick={(event) => {
+              event.preventDefault();
+
+              handleRemoveColor();
+            }}
+            sx={{
+              marginTop: '0.5rem',
+              color: 'var(--color-textPrimary)',
+              backgroundImage: 'var(--color-adminButton)',
+              '&:hover': {
+                backgroundImage: 'var(--color-hoverAdminButton)',
+              },
+            }}
+          >
+            Enlever la couleur
+          </Button>
+        </div>
+      </Popover>
+    </>
+  );
+};
+
+// CardColorButton.tsx
+export const HightlightColorButton = ({ editor, className }: ColorPickerButtonProps) => {
+  const colorPicker = useColorPicker({editor, className});
+  
+  if (!colorPicker) return null;
+  
+  const { 
+    anchorEl, 
+    setAnchorEl, 
+    setColorType,
+    selectedCardColor ,
+    handleChangeColor,
+    handleRemoveColor,
+    handleClose,
+    colorType,
+    selectedTextColor,
+    selectedColor,
+  } = colorPicker;
+
+  if (!editor) return null;
+
+  return (
+    <>
+      <button
+        title='Couleur de surlignage'
+      type='button'
+        className={className}
+        onClick={(e) => {
+          e.preventDefault();
+          setColorType('card');
+          setAnchorEl(e.currentTarget);
+        }}
+        disabled={!editor.isActive('card')}
+      >
+        <FormatColorFillIcon />
+      </button>
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <div style={{ padding: '10px', position: 'relative' }}>
+          <SketchPicker
+           color={
+            colorType === 'text' ? selectedTextColor :
+            colorType === 'highlight' ? selectedColor :
+            selectedCardColor
+          }
             onChange={handleChangeColor}
             disableAlpha={true}
           />

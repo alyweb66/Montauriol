@@ -1,5 +1,5 @@
 // CustomImage.tsx
-import { useEffect, useRef, useState } from '@/components/ui';
+import { useRef, useState } from '@/components/ui';
 import { Node, mergeAttributes } from '@tiptap/core';
 import {
   ReactNodeViewRenderer,

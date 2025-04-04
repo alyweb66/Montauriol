@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import { Extension, type Command } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { CustomImage } from '../../lib/resizableImage';
@@ -30,9 +31,15 @@ import {
   LinkOffIcon,
   FormatUnderlinedIcon,
   Popover,
+  useEffect,
+  ViewAgendaIcon,
 } from '../ui';
 import './titap.css';
-import { ColorPickerButton } from './colorPickerButton/colorPickerButton';
+import {
+  CardColorButton,
+  TextColorButton,
+  HightlightColorButton,
+} from './colorPickerButton/colorPickerButton';
 import { YoutubePopover } from './popover/youtubePopover';
 import { LinkPopover } from './popover/linkPopover';
 import Underline from '@tiptap/extension-underline';
@@ -41,16 +48,29 @@ import Placeholder from '@tiptap/extension-placeholder';
 import FontFamily from '@tiptap/extension-font-family';
 import { TextFormatSelect } from './select/select';
 import EmojiPicker, { Theme, EmojiStyle } from 'emoji-picker-react';
-import Image from '@tiptap/extension-image'
+import Image from '@tiptap/extension-image';
+import { Card } from '@/lib/card';
+import { NodeSelection } from '@tiptap/pm/state';
+
+/* export interface CustomExtensionStorage {
+  awesomeness: number
+} */
 
 const TiptapEditor = () => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
+
+  const Emoji = Image.extend({
+    name: 'emoji',
+    inline: true, // Rendre l'emoji inline
+    group: 'inline',
+    draggable: false,
+  });
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         dropcursor: {
-          color: '#e17100', // Remplace la couleur par défaut par du rouge
+          color: '#e17100', //
         },
       }),
       CustomImage,
@@ -147,11 +167,13 @@ const TiptapEditor = () => {
         // },
       }),
       FontFamily,
-      Image.configure({
+
+      Emoji.configure({
         HTMLAttributes: {
           class: 'emoji',
         },
-      })
+      }),
+      Card,
     ],
     immediatelyRender: false,
     onUpdate: async ({ editor }) => {
@@ -223,15 +245,77 @@ const TiptapEditor = () => {
 const MenuBar = ({ editor }: { editor: Editor }) => {
   if (!editor) return null;
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  
+  const [selectionType, setSelectionType] = useState<'text' | 'card' | null>(
+    null
+  );
+  console.log('selectionType', selectionType);
+
+  // Mettre à jour l'état quand la sélection change
+  useEffect(() => {
+    console.log('selectionType', editor.state.selection);
+
+    const handleSelectionChange = () => {
+      const selection = editor.state.selection;
+      if (selection instanceof NodeSelection) {
+        const nodeTypeName = selection.node.type.name;
+        if (nodeTypeName === 'card') {
+          console.log('Type de nœud sélectionné:', nodeTypeName); // "card"
+          setSelectionType('card');
+        } else {
+          console.log('Type de nœud sélectionné:', nodeTypeName); // "text"
+          setSelectionType('text');
+        }
+      } else {
+        console.log('Aucun nœud sélectionné');
+        setSelectionType('text');
+      }
+    };
+    /*  if (editor.isActive('card')) {
+        const { from, to } = editor.state.selection;
+        let isCardNodeSelected = false;
+
+        editor.state.doc.nodesBetween(from, to, (node) => {
+          if (node.type.name === 'card') {
+            isCardNodeSelected = true;
+          }
+        });
+
+        if (isCardNodeSelected) {
+          setSelectionType('card');
+        } else {
+          setSelectionType('text');
+        }
+      } else {
+        setSelectionType(null);
+      }
+    }; */
+
+    editor.on('selectionUpdate', handleSelectionChange);
+    return () => {
+      editor.off('selectionUpdate', handleSelectionChange);
+    };
+  }, [editor?.state.selection]);
+
+  const handleAlign = (align: 'left' | 'center' | 'right') => {
+    if (selectionType === 'card') {
+      editor
+        .chain()
+        .focus()
+        .updateAttributes('card', { cardAlign: align })
+        // Réapplique la sélection après modification
+        .setNodeSelection(editor.state.selection.from)
+        .run();
+    } else {
+      editor.chain().focus().setTextAlign(align).run();
+    }
+  };
+
   const handleEmojiClick = (emojiObject: any) => {
     console.log('emojiObject', emojiObject);
-    
-    editor.chain().focus().setImage({ src: emojiObject.imageUrl }).run();
 
+    editor.chain().focus().setImage({ src: emojiObject.imageUrl }).run();
   };
-  
-  
+
   // Upload media
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -369,19 +453,39 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       >
         <FormatUnderlinedIcon />
       </button>
-      
+
       <TextFormatSelect editor={editor} isTextSize={true} />
       <TextFormatSelect editor={editor} isTextSize={false} />
-      
-      <ColorPickerButton
+      <div className="w-fit rounded-xl border-1 border-gray-200">
+        <button
+          title="Créer une carte"
+          type="button"
+          onClick={() => editor.chain().focus().toggleCard().run()}
+          className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
+            editor.isActive('card')
+              ? 'bg-[image:var(--color-adminButton)] text-white'
+              : 'bg-white text-black'
+          }`}
+        >
+          <ViewAgendaIcon />
+        </button>
+        <CardColorButton
+          className="p-1 rounded-full m-1 active:scale-80 transition transform"
+          editor={editor}
+        />
+      </div>
+      <HightlightColorButton
         className="p-1 rounded-full m-1 active:scale-80 transition transform"
         editor={editor}
       />
-
+      <TextColorButton
+        className="p-1 rounded-full m-1 active:scale-80 transition transform"
+        editor={editor}
+      />
       <button
         title="Aligner à gauche"
         type="button"
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        onClick={() => handleAlign('left')}
         className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'left' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
@@ -393,7 +497,7 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       <button
         title="Aligner au centre"
         type="button"
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        onClick={() => handleAlign('center')}
         className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'center' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
@@ -405,7 +509,7 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       <button
         title="Aligner à droite"
         type="button"
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        onClick={() => handleAlign('right')}
         className={`p-1 rounded-full m-1 active:scale-80 transition transform ${
           editor.isActive({ textAlign: 'right' })
             ? 'bg-[image:var(--color-adminButton)] text-white'
@@ -526,11 +630,11 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
       </button>
 
       <Popover
-              open={Boolean(anchorEl)}
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-            >
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
         <div /* className="absolute z-50 top-12 right-4" */>
           <EmojiPicker
             onEmojiClick={handleEmojiClick}
